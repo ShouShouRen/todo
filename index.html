@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-hant-tw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背單字啦</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            單字表
+            <div class="content">
+                <span>你總共有<span class="pendingTasks"></span>個單字</span>
+                <button class="deletedAll">清除</button>
+            </div>
+        </header>
+        <div class="inputField">
+            <input type="text" placeholder="請輸入單字">
+            <button class="add" type="submit"><i class="fas fa-plus"></i></button>
+        </div>
+        <ul class="todoList">
+            <li>
+                <input type="checkbox" id="check1">
+                <label for="check1"></label>
+                <span class="editicon"><i class="fas fa-pencil-alt"></i></span>
+                <span class="icon deleted"><i class="fas fa-trash"></i></span>
+            </li>
+            <!-- data are comes from local storage -->
+        </ul>
+        <div class="edit disNone">
+            <i class="index"></i>
+            <input type="text" placeholder="Edit your todo">
+            <button class="add" type="submit">確定</i></button>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    // getting all required elements
+    const inputBox = document.querySelector(".inputField input");
+    const addBtn = document.querySelector(".inputField button");
+    const todoList = document.querySelector(".todoList");
+    const deleteAllBtn = document.querySelector(".content button");
+    const editBox = document.querySelector(".edit");
+    var listArray = [];
+
+    showTasks();
+    function showTasks() {
+        let userValue = inputBox.value;
+        let getLocalStorageData = localStorage.getItem('NewTodo');
+        if (getLocalStorageData == null) listArray = [];
+        else listArray = JSON.parse(getLocalStorageData);
+        const pendingTasksNumber = document.querySelector('.pendingTasks');
+        pendingTasksNumber.textContent = listArray.length;
+        let newTodoList = '';
+        listArray.forEach((element, index) => {
+            newTodoList += `
+                <li>
+                <input type="checkbox" id="check${index}">
+                <label for="check${index}">${element}</label>
+                <span class="editicon" onclick="openEditTask(${index})"><i class="fas fa-pencil-alt"></i></span>
+                <span class="icon" onclick="deletedTask(${index})"><i class="fas fa-trash"></i></span>
+                </li>
+            `;
+        });
+        todoList.innerHTML = newTodoList;
+        inputBox.value = '';
+    }
+
+    addBtn.onclick = () => {
+        let userValue = inputBox.value;
+        if (userValue !== "") {
+            let getLocalStorageData = localStorage.getItem('NewTodo');
+            if (getLocalStorageData == null) listArray = [];
+            else listArray = JSON.parse(getLocalStorageData);
+            listArray.push(userValue);
+            localStorage.setItem('NewTodo', JSON.stringify(listArray));
+            showTasks();
+        }
+    }
+    function deletedTask(index) {
+        let getLocalStorageData = localStorage.getItem('NewTodo');
+        listArray = JSON.parse(getLocalStorageData);
+        listArray.splice(index, 1);
+        localStorage.setItem("NewTodo", JSON.stringify(listArray));
+        showTasks();
+    }
+    deleteAllBtn.onclick = () => {
+        listArray = [];
+        localStorage.setItem("NewTodo", JSON.stringify(listArray));
+        showTasks();
+    }
+    function openEditTask(index) {
+        let getLocalStorageData = localStorage.getItem('NewTodo');
+        listArray = JSON.parse(getLocalStorageData);
+        editValue = listArray[index]
+        editBox.querySelector("input").value = listArray[index];
+        editBox.querySelector(".index").innerText = index;
+        editBox.classList.remove("disNone");
+    }
+    editBox.querySelector('button').onclick = () => {
+        let editValue = editBox.querySelector("input").value;
+        let index = editBox.querySelector(".index").innerText;
+        let getLocalStorageData = localStorage.getItem('NewTodo');
+        listArray = JSON.parse(getLocalStorageData);
+        listArray.splice(index, 1, editValue);
+        localStorage.setItem("NewTodo", JSON.stringify(listArray));
+        showTasks();
+        editBox.classList.add("disNone");
+    }
+
+</script>
+
+</html>
